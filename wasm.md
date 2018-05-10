@@ -90,9 +90,12 @@ When a unary operator is the next instruction, the single argument is loaded fro
     syntax UnOp ::= IUnOp
  // ---------------------
 
-    syntax Instr ::= "(" IValType "." IUnOp ")"
+    syntax Instr ::= "(" IValType "." IUnOp       ")"
+                   | "(" IValType "." IUnOp Instr ")"
                    | IValType "." IUnOp Int
  // ---------------------------------------
+    rule <k> ( ITYPE . UOP:IUnOp I:Instr ) => I ~> ( ITYPE . UOP ) ... </k>
+
     rule <k> ( ITYPE . UOP:IUnOp ) => ITYPE . UOP SI1 ... </k>
          <stack> < ITYPE > SI1 : STACK => STACK </stack>
 ```
@@ -105,9 +108,12 @@ When a binary operator is the next instruction, the two arguments are loaded fro
     syntax BinOp ::= IBinOp
  // -----------------------
 
-    syntax Instr ::= "(" IValType "." IBinOp ")"
+    syntax Instr ::= "(" IValType "." IBinOp             ")"
+                   | "(" IValType "." IBinOp Instr Instr ")"
                    | IValType "." IBinOp Int Int
  // --------------------------------------------
+    rule <k> ( ITYPE . BOP:IBinOp I:Instr I':Instr ) => I' ~> I ~> ( ITYPE . BOP ) ... </k>
+
     rule <k> ( ITYPE . BOP:IBinOp ) => ITYPE . BOP SI1 SI2 ... </k>
          <stack> < ITYPE > SI1 : < ITYPE > SI2 : STACK => STACK </stack>
 ```
