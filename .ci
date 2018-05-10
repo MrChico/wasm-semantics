@@ -1,0 +1,3 @@
+[test "simple"]
+    command      = make clean && make deps && make build && make test -j4
+    trackedFiles = .build/logs/failing

@@ -3,6 +3,11 @@
 set -e      # Exit immediately if any command fails
 set -u      # Using undefined variables is an error. Exit immediately
 
+log_dir=".build/logs"
+mkdir -p "$log_dir"
+runtime_log="$log_dir/runtime"
+failing_log="$log_dir/failing"
+
 # Utilities
 # ---------
 
@@ -49,8 +54,13 @@ run_test() {
     local output_file="$(mktemp $test_file.out.XXXXXX)"
     trap "rm -rf $output_file" INT TERM EXIT
     export DEFN_DIRECTORY="$(pwd)/.build/defn/test"
+    local start_time="$(date '+%s')"
     run_krun "$test_file" > "$output_file"
-    pretty_diff "$expected_file" "$output_file"
+    if ! pretty_diff "$expected_file" "$output_file"; then
+        echo "$test_file" >> "$failing_log"
+    fi
+    local end_time="$(date '+%s')"
+    echo "$((end_time - start_time))    $test_file" >> "$runtime_log"
 }
 
 # Main
