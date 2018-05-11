@@ -63,8 +63,8 @@ If the value is the special `undefined`, then `trap` is generated instead.
       requires V =/=K undefined
 ```
 
-Numeric Operators
------------------
+Operator Arities
+----------------
 
 A large portion of the available opcodes are pure arithmetic.
 This allows us to give purely functional semantics to many numeric opcodes.
@@ -117,6 +117,24 @@ When a binary operator is the next instruction, the two arguments are loaded fro
     rule <k> ( ITYPE . BOP:IBinOp ) => ITYPE . BOP SI1 SI2 ... </k>
          <stack> < ITYPE > SI1 : < ITYPE > SI2 : STACK => STACK </stack>
 ```
+
+### Casting Operators
+
+These operators check that the loaded stack item has the correct source-type, and produce a value in the target type.
+
+```k
+    syntax Instr ::= "(" IValType "." CastOp "/" IValType       ")"
+                   | "(" IValType "." CastOp "/" IValType Instr ")"
+                   | IValType "." CastOp "/" IValType Int
+ // -----------------------------------------------------
+    rule <k> ( TTYPE . COP / STYPE I:Instr ) => I ~> ( TTYPE . COP / STYPE ) ... </k>
+
+    rule <k> ( TTYPE . COP / STYPE ) => TTYPE . COP / STYPE SI1 ... </k>
+         <stack> < STYPE > SI1 : STACK => STACK </stack>
+```
+
+Numeric Operators
+-----------------
 
 ### Integer Arithmetic
 
@@ -223,6 +241,22 @@ All of the following opcodes are liftings of the K builtin operators using the h
 
     rule <k> ITYPE . le_s I1 I2 => < ITYPE > #bool(#signed(ITYPE, I1) <=Int #signed(ITYPE, I2)) ... </k>
     rule <k> ITYPE . ge_s I1 I2 => < ITYPE > #bool(#signed(ITYPE, I1) >=Int #signed(ITYPE, I2)) ... </k>
+```
+
+Casting Operators
+-----------------
+
+### Integer casts
+
+Operator `_wrap/_` will check that the input number has the second type, and interpret it in the first type.
+Operator `_extend_s(u)/_` will take the signed (unsigned) extension of a number to the larger type.
+
+```k
+    syntax CastOp ::= "wrap" | "extend_u" | "extend_s"
+ // --------------------------------------------------
+    rule <k> ITYPE' . wrap     / ITYPE I => #chop(< ITYPE' > I)                             ... </k> requires #width(ITYPE') <=Int #width(ITYPE)
+    rule <k> ITYPE' . extend_u / ITYPE I =>       < ITYPE' > I                              ... </k> requires #width(ITYPE') >=Int #width(ITYPE)
+    rule <k> ITYPE' . extend_s / ITYPE I => < ITYPE' > #unsigned(ITYPE', #signed(ITYPE, I)) ... </k> requires #width(ITYPE') >=Int #width(ITYPE)
 ```
 
 Stack Operations
