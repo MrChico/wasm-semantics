@@ -52,3 +52,30 @@
 (i32.const #pow1(i32) +Int 16)
 (i32.rotr)
 #assertTopStack < i32 > 2 ^Int 28 +Int 2 "rotr"
+
+(i32.clz (i32.const 17))
+#assertTopStack < i32 > 27 "clz 1"
+
+(i32.clz (i32.const 252))
+#assertTopStack < i32 > 24 "clz 2"
+
+(i64.clz (i64.const 9007199254740991))
+#assertTopStack < i64 > 11 "clz 3"
+
+(i32.ctz (i32.const 176))
+#assertTopStack < i32 > 4 "ctz 1"
+
+(i32.ctz (i32.const 4202752))
+#assertTopStack < i32 > 8 "ctz 2"
+
+(i64.ctz (i64.const 1157433900327239680))
+#assertTopStack < i64 > 43 "ctz 3"
+
+(i32.popcnt (i32.const 17))
+#assertTopStack < i32 > 2 "popcnt 1"
+
+(i32.popcnt (i32.const 43))
+#assertTopStack < i32 > 4 "popcnt 2"
+
+(i32.popcnt (i32.const 17))
+#assertTopStack < i32 > 2 "popcnt 3"

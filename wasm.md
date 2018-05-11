@@ -210,7 +210,32 @@ The rotation operators `rotl` and `rotr` do not have appropriate K builtins, and
     rule <k> ITYPE . rotr I1 I2 => #chop(< ITYPE > (I1 >>Int (I2 %Int #width(ITYPE))) +Int (I1 <<Int (#width(ITYPE) -Int (I2 %Int #width(ITYPE))))) ... </k>
 ```
 
-**TODO**: `clz`, `ctz`, `popcnt`.
+-   `clz` counts the number of leading zero bits in a value (must take the width of the value into account).
+-   `ctz` counts the number of trailing zero bits in a value (does not need to take the width of the value into account).
+-   `popcnt` counts the number of non-zero bits in a value (does not need to take the width of the value into account).
+
+```k
+    syntax IUnOp ::= "clz" | "ctz" | "popcnt"
+ // -----------------------------------------
+    rule <k> ITYPE . clz    I => < ITYPE > (#width(ITYPE) -Int #minWidth(I)) ... </k>
+    rule <k> ITYPE . ctz    I => < ITYPE > #ctz(I)                           ... </k>
+    rule <k> ITYPE . popcnt I => < ITYPE > #popcnt(I)                        ... </k>
+
+    syntax Int ::= #minWidth ( Int ) [function]
+                 | #ctz      ( Int ) [function]
+                 | #popcnt   ( Int ) [function]
+ // -------------------------------------------
+    rule #minWidth(0) => 0
+    rule #minWidth(N) => 1 +Int #minWidth(N >>Int 1) requires N =/=Int 0
+
+    rule #ctz(0) => 0
+    rule #ctz(N) => 0                      requires N =/=Int 0 andBool (N %Int 2 ==Int 1)
+    rule #ctz(N) => 1 +Int #ctz(N >>Int 1) requires N =/=Int 0 andBool notBool (N %Int 2 ==Int 1)
+
+    rule #popcnt(0) => 0
+    rule #popcnt(N) => #bool(N %Int 2 ==Int 1) +Int #popcnt(N >>Int 1)
+      requires N =/=Int 0
+```
 
 ### Comparison Operations
 
